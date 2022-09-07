@@ -4,13 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletConstructor;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletRepresenter;
 import io.kaoto.backend.api.service.step.parser.StepParserService;
 import io.kaoto.backend.api.service.step.parser.kamelet.KameletStepParserService;
 import io.kaoto.backend.model.deployment.camelroute.Integration;
 import io.kaoto.backend.model.deployment.kamelet.Flow;
 import io.kaoto.backend.model.deployment.kamelet.FlowStep;
+import io.kaoto.backend.model.deployment.kamelet.step.MarshalFlowStep;
+import io.kaoto.backend.model.deployment.kamelet.step.marshal.MarshalSerializer;
 import io.kaoto.backend.model.step.Step;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -50,12 +55,10 @@ public class IntegrationStepParserService
 
         List<Step> steps = new ArrayList<>();
         try {
-            ObjectMapper yamlMapper =
-                    new ObjectMapper(new YAMLFactory())
-                        .configure(
-                            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                            false);
-            Integration integration = yamlMapper.readValue(input,
+            Yaml yaml = new Yaml(new KameletConstructor(Integration.class),
+                    new KameletRepresenter());
+
+            Integration integration = yaml.loadAs(input,
                     Integration.class);
 
             ksps.processMetadata(res, integration.getMetadata());
@@ -71,7 +74,7 @@ public class IntegrationStepParserService
             }
 
 
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Error trying to parse.", e);
         }

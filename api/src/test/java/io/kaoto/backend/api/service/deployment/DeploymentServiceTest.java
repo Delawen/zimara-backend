@@ -2,6 +2,8 @@ package io.kaoto.backend.api.service.deployment;
 
 import io.kaoto.backend.api.metadata.catalog.StepCatalog;
 import io.kaoto.backend.api.metadata.catalog.ViewDefinitionCatalog;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletConstructor;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletRepresenter;
 import io.kaoto.backend.api.service.step.parser.kamelet.KameletBindingStepParserService;
 import io.kaoto.backend.api.service.viewdefinition.ViewDefinitionService;
 import io.kaoto.backend.model.deployment.kamelet.KameletBinding;
@@ -143,21 +145,8 @@ class DeploymentServiceTest {
             }
         }
 
-        var constructor = new Constructor(KameletBinding.class);
-        Representer representer = new Representer();
-        representer.getPropertyUtils()
-                .setSkipMissingProperties(true);
-        representer.getPropertyUtils()
-                .setAllowReadOnlyProperties(true);
-        representer.getPropertyUtils()
-                .setBeanAccess(BeanAccess.FIELD);
-        constructor.getPropertyUtils()
-                .setSkipMissingProperties(true);
-        constructor.getPropertyUtils()
-                .setAllowReadOnlyProperties(true);
-        constructor.getPropertyUtils()
-                .setBeanAccess(BeanAccess.FIELD);
-        Yaml yaml = new Yaml(constructor, representer);
+        Yaml yaml = new Yaml(new KameletConstructor(KameletBinding.class),
+                new KameletRepresenter());
         KameletBinding res1 = yaml.load(expectedStr);
         KameletBinding res2 = yaml.load(result);
 

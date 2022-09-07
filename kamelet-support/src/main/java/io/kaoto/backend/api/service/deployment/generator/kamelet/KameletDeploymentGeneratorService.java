@@ -6,7 +6,6 @@ import io.kaoto.backend.model.deployment.kamelet.Kamelet;
 import io.kaoto.backend.model.parameter.Parameter;
 import io.kaoto.backend.model.step.Step;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -53,8 +52,9 @@ public class KameletDeploymentGeneratorService
 
     public String getYAML(final CustomResource kamelet,
                           final Representer representer) {
-        final var constructor = new Constructor(Kamelet.class);
-        Yaml yaml = new Yaml(constructor, representer);
+        Yaml yaml = new Yaml(
+                new KameletConstructor(Kamelet.class),
+                representer);
         return yaml.dumpAsMap(kamelet);
     }
 

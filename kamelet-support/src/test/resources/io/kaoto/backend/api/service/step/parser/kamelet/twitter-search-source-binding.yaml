@@ -29,8 +29,11 @@ spec:
       name: aws-translate-action
       kind: Kamelet
   sink:
-    uri: log:info
-    parameters:
-      showBody: 'false'
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      name: sink-broker
+      kind: Broker
+    properties:
+      type: sometype
 storage: true
 version: v1alpha1

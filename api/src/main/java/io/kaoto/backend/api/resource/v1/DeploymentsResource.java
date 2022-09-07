@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.kaoto.backend.api.service.deployment.generator.DeploymentGeneratorService;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletConstructor;
 import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletRepresenter;
 import io.kaoto.backend.deployment.ClusterService;
 import io.kaoto.backend.model.deployment.Integration;
@@ -166,7 +167,7 @@ public class DeploymentsResource {
             for (Class<? extends CustomResource> c
                     : parser.supportedCustomResources()) {
                 try {
-                    Yaml yaml = new Yaml(new Constructor(c),
+                    Yaml yaml = new Yaml(new KameletConstructor(c),
                             new KameletRepresenter());
                     return yaml.dumpAsMap(cr);
                 } catch (Exception e) {

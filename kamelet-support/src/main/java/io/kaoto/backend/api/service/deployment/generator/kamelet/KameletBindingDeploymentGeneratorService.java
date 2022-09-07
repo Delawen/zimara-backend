@@ -10,7 +10,6 @@ import io.kaoto.backend.model.deployment.kamelet.KameletBindingStepRef;
 import io.kaoto.backend.model.parameter.Parameter;
 import io.kaoto.backend.model.step.Step;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
@@ -78,7 +77,7 @@ public class KameletBindingDeploymentGeneratorService
         KameletBinding binding = new KameletBinding(String.valueOf(
                 metadata.getOrDefault("name", "")), spec);
 
-        Yaml yaml = new Yaml(new Constructor(KameletBinding.class),
+        Yaml yaml = new Yaml(new KameletConstructor(KameletBinding.class),
                 new KameletRepresenter());
         return yaml.dumpAsMap(binding);
     }

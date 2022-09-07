@@ -6,6 +6,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.ResourceDefinitionContext;
 import io.kaoto.backend.api.service.deployment.generator.DeploymentGeneratorService;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletConstructor;
+import io.kaoto.backend.api.service.deployment.generator.kamelet.KameletRepresenter;
 import io.kaoto.backend.model.deployment.Integration;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Multi;
@@ -172,21 +174,8 @@ public class ClusterService {
                                       final Class<? extends CustomResource> c) {
         CustomResource binding = null;
         try {
-            var constructor = new Constructor(c);
-            Representer representer = new Representer();
-            representer.getPropertyUtils()
-                    .setSkipMissingProperties(true);
-            representer.getPropertyUtils()
-                    .setAllowReadOnlyProperties(true);
-            representer.getPropertyUtils()
-                    .setBeanAccess(BeanAccess.FIELD);
-            constructor.getPropertyUtils()
-                    .setSkipMissingProperties(true);
-            constructor.getPropertyUtils()
-                    .setAllowReadOnlyProperties(true);
-            constructor.getPropertyUtils()
-                    .setBeanAccess(BeanAccess.FIELD);
-            Yaml yaml = new Yaml(constructor, representer);
+            Yaml yaml = new Yaml(new KameletConstructor(),
+                    new KameletRepresenter());
             binding = yaml.load(input);
         } catch (ConstructorException e) {
             log.trace("Tried with " + c.getName() + " and it didn't "
