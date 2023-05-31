@@ -6,6 +6,8 @@ import io.kaoto.backend.api.service.dsl.DSLSpecification;
 import io.kaoto.backend.api.service.language.LanguageService;
 import io.kaoto.backend.model.step.Step;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.jboss.logging.Logger;
@@ -27,7 +29,7 @@ import java.util.List;
 /**
  * 🐱class IntegrationsResource
  * 🐱relationship compositionOf DeploymentService, 0..1
- *
+ * <p>
  * This endpoint will return the yaml needed to deploy
  * the related integration and the
  * endpoints to interact with deployments.
@@ -72,7 +74,10 @@ public class IntegrationsResource {
     @Operation(summary = "Get CRD",
             description = "Returns the associated custom resource definition. This is an idempotent operation.")
     public String cdr(
-            final @RequestBody Integration request,
+            final @RequestBody(required = true,
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = Integration.class))}) Integration request,
             final @Parameter(description = "DSL to use. For example: 'Kamelet Binding'.")
             @QueryParam("dsl") String dsl) {
         return deploymentService.crd(request, dsl);

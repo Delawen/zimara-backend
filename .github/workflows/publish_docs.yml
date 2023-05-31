@@ -15,13 +15,6 @@ jobs:
       actions: read
       contents: write
 
-    services:
-      kaoto:
-        image: kaotoio/backend:main
-        ports:
-        # will assign a random free host port
-          - 8081/tcp
-
     steps:
       - name: 🏠 Checkout repository
         uses: actions/checkout@v3
@@ -29,13 +22,28 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "14"
-      - run: npm install
-      - run: mkdir docs
-      - run: sudo apt-get update; sudo apt-get install xdot
-      - run: npm run docs
-      - run: curl http://localhost:${{ job.services.kaoto.ports[8081] }}/q/openapi?type=json > /tmp/openapi.json
-      - run: wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/3.0.33/swagger-codegen-cli-3.0.33.jar
-      - run: java -jar swagger-codegen-cli-3.0.33.jar generate -i /tmp/openapi.json -l html2 -o docs/api/
+      - name: "npm install"
+        run: npm install
+      - name: "Create docs folder"
+        run: mkdir docs
+      - name: "Install xdot"
+        run: sudo apt-get update; sudo apt-get install xdot
+      - name: "Generate Documentation"
+        run: npm run docs
+      - name: 🥸 Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          check-latest: true
+      - name: 🔥 Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: 🦾 Build Swagger UI
+        run: mvn clean compile -Pswagger-ui
       - name: 🚀 deploy
         uses: peaceiris/actions-gh-pages@v3
         with:

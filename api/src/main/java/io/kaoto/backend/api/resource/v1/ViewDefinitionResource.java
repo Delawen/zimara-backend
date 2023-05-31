@@ -5,10 +5,15 @@ import io.kaoto.backend.model.step.Step;
 import io.kaoto.backend.model.view.ViewDefinition;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.info.License;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
@@ -25,36 +30,35 @@ import java.util.List;
 /**
  * 🐱class ViewDefinitionResource
  * 🐱relationship compositionOf ViewDefinitionService, 0..1
- *
+ * <p>
  * This endpoint will return a list of views based on the parameters.
- *
  */
 @Path("/v1/view-definitions")
 @ApplicationScoped
 @OpenAPIDefinition(
         info = @Info(
-            title = "View Definition API",
-            version = "1.0.0",
-            description = "With this API, backend and frontend agree on what "
-                    + "views and extensions can be used for the "
-                    + "integration workflow.",
-            contact = @Contact(
-                    name = "Kaoto Team",
-                    url = "https://kaoto.io"),
-            license = @License(
-                    name = "Apache 2.0",
-                    url = "https://www.apache.org/licenses/LICENSE-2.0.html"))
+                title = "View Definition API",
+                version = "1.0.0",
+                description = "With this API, backend and frontend agree on what "
+                        + "views and extensions can be used for the "
+                        + "integration workflow.",
+                contact = @Contact(
+                        name = "Kaoto Team",
+                        url = "https://kaoto.io"),
+                license = @License(
+                        name = "Apache 2.0",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.html"))
 )
 public class ViewDefinitionResource {
 
     private Logger log = Logger.getLogger(ViewDefinitionResource.class);
+    private ViewDefinitionService viewDefinitionService;
 
     @Inject
     public void setViewDefinitionService(
             final ViewDefinitionService viewDefinitionService) {
         this.viewDefinitionService = viewDefinitionService;
     }
-    private ViewDefinitionService viewDefinitionService;
 
     /*
      * 🐱method viewsPerStepList:
@@ -69,8 +73,29 @@ public class ViewDefinitionResource {
     @Operation(summary = "Get views based on steps",
             description = "Get view definitions for a specific resource."
                     + " This is an idempotent operation.")
+    @APIResponses({
+            @APIResponse(responseCode = "200",
+                    description = "View Definitions List",
+                    content = @Content(
+                            schema =
+                            @Schema(
+                                    description = "The flows associated to the source code.",
+                                    type = SchemaType.ARRAY,
+                                    implementation = ViewDefinition.class),
+                            mediaType = MediaType.APPLICATION_JSON
+                    )
+            )
+    }
+    )
     public List<ViewDefinition> viewsPerStepList(
-            final @RequestBody List<Step> steps) {
+            final @RequestBody(required = true,
+                    content = {
+                            @Content(schema =
+                            @Schema(description = "The list of steps to match with view definitions.",
+                                    type = SchemaType.ARRAY,
+                                    implementation = Step.class),
+                                    mediaType = MediaType.APPLICATION_JSON)})
+            List<Step> steps) {
         return viewDefinitionService.viewsPerStepList(steps);
     }
 

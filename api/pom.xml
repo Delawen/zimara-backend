@@ -115,6 +115,7 @@
                     <plugin>
                         <groupId>io.smallrye</groupId>
                         <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                        <version>3.3.4</version>
                         <executions>
                             <execution>
                                 <phase>compile</phase>
@@ -124,8 +125,12 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <outputDirectory>${project.basedir}/src/main/resources/api.yaml</outputDirectory>
-                            <includeDependenciesScopes>compile,provided,system,test,import</includeDependenciesScopes>
+                            <infoTitle>Kaoto API</infoTitle>
+                            <infoVersion>${project.version}</infoVersion>
+                            <infoDescription>This is the API of Kaoto. More info in kaoto.io .</infoDescription>
+                            <infoContactUrl>https://kaoto.io</infoContactUrl>
+                            <outputDirectory>${project.basedir}/src/main/resources/</outputDirectory>
+                            <includeDependenciesScopes>compile,provided,import,system</includeDependenciesScopes>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -139,9 +144,9 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <inputSpec>${project.basedir}/src/main/resources/api.yaml/openapi.json</inputSpec>
+                                    <inputSpec>${project.basedir}/src/main/resources/openapi.json</inputSpec>
                                     <language>html2</language>
-                                    <output>/tmp/api/</output>
+                                    <output>${project.basedir}/../docs/api</output>
                                 </configuration>
                             </execution>
                         </executions>

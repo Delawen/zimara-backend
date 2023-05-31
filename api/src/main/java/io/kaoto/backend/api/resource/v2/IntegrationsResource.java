@@ -8,8 +8,13 @@ import io.kaoto.backend.api.service.step.parser.StepParserService;
 import io.kaoto.backend.model.step.Step;
 import io.quarkus.cache.CacheResult;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
@@ -67,10 +72,39 @@ public class IntegrationsResource {
     @Produces("text/yaml")
     @Path("/")
     @CacheResult(cacheName = "api")
-    @Operation(summary = "Get CRDs",
-            description = "Returns the associated custom resource definitions. This is an idempotent operation.")
+    @Operation(
+            summary = "Get Integration Object",
+            description = "Given the associated source code, returns the JSON object. This is an idempotent operation.")
+    @APIResponses({
+            @APIResponse(responseCode = "200",
+                    description = "Used when requesting flows",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(description = "The flows associated to the source code.",
+                                    type = SchemaType.OBJECT,
+                                    implementation = FlowsWrapper.class))
+            ),
+            @APIResponse(responseCode = "200",
+                    description = "Used when requesting source code",
+                    content = @Content(
+                            mediaType = "text/yaml",
+                            schema = @Schema(
+                                    description = "The source code associated to the flows.",
+                                    type = SchemaType.STRING)))
+    }
+    )
     public String crds(
-            final @RequestBody FlowsWrapper request,
+            final @RequestBody(required = true,
+                    description = "This is either the source code or the flows we want to parse.",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(description = "These are the flows we want to parse.",
+                                            implementation = FlowsWrapper.class)),
+                            @Content(
+                                    mediaType = "text/yaml",
+                                    schema = @Schema(description = "The source code we want to parse.",
+                                            type = SchemaType.STRING))}) FlowsWrapper request,
             final @Parameter(description = "DSL to use. For example: 'Kamelet Binding'.")
             @QueryParam("dsl") String dsl) {
         return deploymentService.crds(request.flows(), request.metadata(), dsl);
@@ -89,12 +123,9 @@ public class IntegrationsResource {
     @Consumes("text/yaml")
     @Path("/")
     @CacheResult(cacheName = "api")
-    @Operation(summary = "Get Integration Object",
-            description = "Given the associated custom resource definition, returns the JSON object."
-                    + " This is an idempotent operation.")
     public FlowsWrapper integration(
             final @RequestBody String crd,
-            final @Parameter(description = "DSL to use. For example: 'Kamelet Binding'.")
+            final @Parameter(description = "DSL to use. For example: 'Kamelet'.")
             @QueryParam("dsl") String dsl) {
         List<Integration> integrations = new ArrayList<>();
         Map<String, Object> metadata = new LinkedHashMap<>();
