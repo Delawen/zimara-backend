@@ -60,8 +60,18 @@ public class CamelRouteDeserializer extends StdDeserializer<CamelRoute> {
                 if (answer.getRouteConfiguration() == null) {
                     answer.setRouteConfiguration(config);
                 }
+            }  else if (field.has("routeConfiguration")) {
+                Object config = ctxt.readTreeAsValue(field.get("routeConfiguration"), Object.class);
+                if (answer.getRouteConfiguration() == null) {
+                    answer.setRouteConfiguration(config);
+                }
             }   else if (field.has("rest-configuration")) {
                 Object config = ctxt.readTreeAsValue(field.get("rest-configuration"), Object.class);
+                if (answer.getRestConfiguration() == null) {
+                    answer.setRestConfiguration(config);
+                }
+            }   else if (field.has("restConfiguration")) {
+                Object config = ctxt.readTreeAsValue(field.get("restConfiguration"), Object.class);
                 if (answer.getRestConfiguration() == null) {
                     answer.setRestConfiguration(config);
                 }
